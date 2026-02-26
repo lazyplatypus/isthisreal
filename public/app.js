@@ -8,28 +8,7 @@ let state = {
 
 let models = { anthropic: [], openai: [] };
 
-// --- Utility ---
-
-function show(id) {
-  document.getElementById(id).classList.remove("hidden");
-}
-
-function hide(id) {
-  document.getElementById(id).classList.add("hidden");
-}
-
-function showError(parentId, message) {
-  const existing = document.querySelector(`#${parentId} .error`);
-  if (existing) existing.remove();
-  const el = document.createElement("div");
-  el.className = "error";
-  el.textContent = message;
-  document.getElementById(parentId).appendChild(el);
-}
-
-function clearErrors(parentId) {
-  document.querySelectorAll(`#${parentId} .error`).forEach((e) => e.remove());
-}
+// ─── Utility ───
 
 function escapeHtml(str) {
   const div = document.createElement("div");
@@ -37,7 +16,45 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-// --- Settings ---
+function showCard(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove("hidden", "exiting");
+  el.classList.add("entering");
+  el.addEventListener("animationend", () => el.classList.remove("entering"), { once: true });
+}
+
+function hideCard(id) {
+  const el = document.getElementById(id);
+  if (!el || el.classList.contains("hidden")) return;
+  el.classList.add("exiting");
+  el.addEventListener("animationend", () => {
+    el.classList.add("hidden");
+    el.classList.remove("exiting");
+  }, { once: true });
+}
+
+function show(id) {
+  document.getElementById(id)?.classList.remove("hidden");
+}
+
+function hide(id) {
+  document.getElementById(id)?.classList.add("hidden");
+}
+
+function showError(parentId, message) {
+  clearErrors(parentId);
+  const el = document.createElement("div");
+  el.className = "error";
+  el.textContent = message;
+  document.getElementById(parentId)?.appendChild(el);
+}
+
+function clearErrors(parentId) {
+  document.querySelectorAll(`#${parentId} .error`).forEach((e) => e.remove());
+}
+
+// ─── Settings ───
 
 function toggleSettings() {
   const body = document.getElementById("settings-body");
@@ -48,19 +65,15 @@ function toggleSettings() {
 
 function toggleKeyVisibility() {
   const input = document.getElementById("api-key-input");
-  const btn = document.getElementById("btn-toggle-key");
   if (input.type === "password") {
     input.type = "text";
-    btn.textContent = "Hide";
   } else {
     input.type = "password";
-    btn.textContent = "Show";
   }
 }
 
 function onProviderChange() {
-  const provider = document.getElementById("provider-select").value;
-  populateModels(provider);
+  populateModels(document.getElementById("provider-select").value);
 }
 
 function populateModels(provider) {
@@ -91,7 +104,7 @@ function getSettings() {
   };
 }
 
-// --- Step 1: Load repo ---
+// ─── Step 1: Load Repo ───
 
 async function loadRepo() {
   const input = document.getElementById("repo-path");
@@ -102,10 +115,10 @@ async function loadRepo() {
 
   clearErrors("step-repo");
   btn.disabled = true;
-  btn.textContent = "Loading...";
+  btn.querySelector(".btn-label").textContent = "Loading";
+  btn.querySelector(".btn-spinner").classList.remove("hidden");
 
   try {
-    // Fetch authors and branches in parallel
     const [authorsRes, branchesRes] = await Promise.all([
       fetch("/api/authors", {
         method: "POST",
@@ -131,7 +144,6 @@ async function loadRepo() {
     state.authors = authorsData.authors || [];
     state.branches = branchesData.branches || [];
 
-    // Populate filter dropdowns
     const authorSelect = document.getElementById("filter-author");
     authorSelect.innerHTML = '<option value="">All authors</option>';
     state.authors.forEach((a) => {
@@ -150,26 +162,25 @@ async function loadRepo() {
       branchSelect.appendChild(opt);
     });
 
-    show("step-filter");
-    hide("step-analyze");
-    hide("step-results");
+    showCard("step-filter");
+    hideCard("step-analyze");
+    hideCard("step-results");
 
-    // Auto-load commits with no filters
     applyFilters();
   } catch (err) {
-    showError("step-repo", "Failed to connect to server: " + err.message);
+    showError("step-repo", "Failed to connect: " + err.message);
   } finally {
     btn.disabled = false;
-    btn.textContent = "Load";
+    btn.querySelector(".btn-label").textContent = "Load";
+    btn.querySelector(".btn-spinner").classList.add("hidden");
   }
 }
 
-// --- Step 2: Filter and explore commits ---
+// ─── Step 2: Filter Commits ───
 
 async function applyFilters() {
   const author = document.getElementById("filter-author").value;
   const branch = document.getElementById("filter-branch").value;
-
   clearErrors("step-filter");
 
   try {
@@ -182,19 +193,23 @@ async function applyFilters() {
 
     if (!res.ok) {
       showError("step-filter", data.error);
-      hide("step-analyze");
+      hideCard("step-analyze");
       return;
     }
 
     state.commits = data.commits;
     renderCommitInfo(data.commits, author, branch);
 
+    // Update count badge
+    document.getElementById("commit-count").textContent =
+      data.commits.length > 0 ? `${data.commits.length} commits` : "";
+
     if (data.commits.length > 0) {
-      show("step-analyze");
+      showCard("step-analyze");
     } else {
-      hide("step-analyze");
+      hideCard("step-analyze");
     }
-    hide("step-results");
+    hideCard("step-results");
   } catch (err) {
     showError("step-filter", err.message);
   }
@@ -204,62 +219,59 @@ function renderCommitInfo(commits, author, branch) {
   const info = document.getElementById("commit-info");
 
   if (commits.length === 0) {
-    info.innerHTML = "<span style='color:#888'>No commits match the current filters.</span>";
-    show("commit-info");
-    info.classList.remove("hidden");
+    info.innerHTML = '<span style="color:var(--text-tertiary)">No commits match the current filters.</span>';
     return;
   }
 
   const recent = commits.slice(0, 30);
   const dateRange = `${commits[commits.length - 1].date.split("T")[0]} to ${commits[0].date.split("T")[0]}`;
   const filterDesc = [
-    author && `author: <strong>${escapeHtml(author)}</strong>`,
-    branch && `branch: <strong>${escapeHtml(branch)}</strong>`,
-  ]
-    .filter(Boolean)
-    .join(", ");
+    author && `<strong>${escapeHtml(author)}</strong>`,
+    branch && `on <strong>${escapeHtml(branch)}</strong>`,
+  ].filter(Boolean).join(" ");
 
-  const showAuthorCol = !author; // show author column if "all authors"
+  const showAuthorCol = !author;
 
   info.innerHTML = `
-    <strong>${commits.length}</strong> commits${filterDesc ? ` matching ${filterDesc}` : ""}<br>
-    Date range: ${dateRange}
+    <div style="margin-bottom:8px">
+      <strong>${commits.length}</strong> commits${filterDesc ? ` by ${filterDesc}` : ""}
+      <span style="color:var(--text-tertiary);margin-left:8px;font-size:0.78rem">${dateRange}</span>
+    </div>
     <div class="commit-list">
-      ${recent
-        .map(
-          (c) =>
-            `<div class="commit-item">
-              <span class="hash">${c.hash.slice(0, 7)}</span>
-              <span class="date">${c.date.split("T")[0]}</span>
-              ${showAuthorCol ? `<span class="author-tag">${escapeHtml(c.author)}</span>` : ""}
-              <span class="msg">${escapeHtml(c.message)}</span>
-            </div>`
-        )
-        .join("")}
-      ${commits.length > 30 ? `<div style="padding:8px 0;color:#666;">...and ${commits.length - 30} more</div>` : ""}
+      ${recent.map((c, i) =>
+        `<div class="commit-item" style="animation-delay:${i * 20}ms">
+          <span class="hash">${c.hash.slice(0, 7)}</span>
+          <span class="date">${c.date.split("T")[0]}</span>
+          ${showAuthorCol ? `<span class="author-tag">${escapeHtml(c.author)}</span>` : ""}
+          <span class="msg">${escapeHtml(c.message)}</span>
+        </div>`
+      ).join("")}
+      ${commits.length > 30 ? `<div style="padding:8px 0;color:var(--text-tertiary);font-size:0.75rem">+ ${commits.length - 30} more</div>` : ""}
     </div>
   `;
-  info.classList.remove("hidden");
 }
 
-// --- Step 3: Run analysis ---
+// ─── Step 3: Run Analysis ───
 
 function runAnalysis() {
   const settings = getSettings();
 
   if (!settings.apiKey) {
-    showError("step-analyze", "Please enter an API key in the Settings panel above.");
+    showError("step-analyze", "Enter an API key in Settings above.");
     return;
   }
 
   const btn = document.getElementById("btn-analyze");
   btn.disabled = true;
-  btn.textContent = "Analyzing...";
-  clearErrors("step-analyze");
+  const label = btn.querySelector(".btn-label");
+  const icon = btn.querySelector(".btn-icon");
+  label.textContent = "Analyzing...";
+  if (icon) icon.style.animation = "pulse 1.2s ease-in-out infinite";
 
-  show("step-results");
+  clearErrors("step-analyze");
+  showCard("step-results");
   hide("result-area");
-  document.getElementById("progress-area").classList.remove("hidden");
+  show("progress-area");
   document.getElementById("progress-bar").style.width = "0%";
   document.getElementById("progress-text").innerHTML =
     '<span class="spinner"></span>Starting analysis...';
@@ -290,7 +302,8 @@ function runAnalysis() {
       function processChunk({ done, value }) {
         if (done) {
           btn.disabled = false;
-          btn.textContent = "Analyze Commits";
+          label.textContent = "Analyze Commits";
+          if (icon) icon.style.animation = "";
           return;
         }
 
@@ -319,7 +332,8 @@ function runAnalysis() {
     .catch((err) => {
       showError("step-results", "Connection error: " + err.message);
       btn.disabled = false;
-      btn.textContent = "Analyze Commits";
+      label.textContent = "Analyze Commits";
+      if (icon) icon.style.animation = "";
     });
 }
 
@@ -335,18 +349,21 @@ function handleSSE(event, data) {
       const pct = Math.round((data.current / data.total) * 100);
       bar.style.width = pct + "%";
       if (data.step === "diffs") {
-        text.innerHTML = `<span class="spinner"></span>Extracting diffs: ${data.current}/${data.total}`;
+        text.innerHTML = `<span class="spinner"></span>Extracting diffs ${data.current}/${data.total}`;
       } else if (data.step === "llm") {
-        text.innerHTML = `<span class="spinner"></span>LLM analysis: batch ${data.current}/${data.total}`;
+        text.innerHTML = `<span class="spinner"></span>LLM analysis batch ${data.current}/${data.total}`;
       }
       break;
     }
     case "result":
       bar.style.width = "100%";
-      text.textContent = "Done!";
+      text.innerHTML = '<span style="color:#4ade80">Done</span>';
       state.resultMarkdown = data.skills;
       document.getElementById("skills-output").textContent = data.skills;
       show("result-area");
+      // Mark step 4 as done
+      const pill = document.querySelector("#step-results .step-pill");
+      if (pill) pill.classList.add("done");
       break;
     case "error":
       text.textContent = "";
@@ -355,14 +372,21 @@ function handleSSE(event, data) {
   }
 }
 
-// --- Result actions ---
+// ─── Result Actions ───
 
 function copyResult() {
   navigator.clipboard.writeText(state.resultMarkdown).then(() => {
-    const btn = event.target;
-    const orig = btn.textContent;
-    btn.textContent = "Copied!";
-    setTimeout(() => (btn.textContent = orig), 1500);
+    const btn = document.getElementById("btn-copy");
+    const span = btn.querySelector("span");
+    const orig = span.textContent;
+    span.textContent = "Copied!";
+    btn.style.color = "#4ade80";
+    btn.style.borderColor = "rgba(74,222,128,0.2)";
+    setTimeout(() => {
+      span.textContent = orig;
+      btn.style.color = "";
+      btn.style.borderColor = "";
+    }, 1500);
   });
 }
 
@@ -376,10 +400,16 @@ function downloadResult() {
   URL.revokeObjectURL(url);
 }
 
-// --- Init ---
+// ─── Init ───
 
 document.addEventListener("DOMContentLoaded", () => {
   loadModels();
+
+  // Initially hide steps 2-4
+  ["step-filter", "step-analyze", "step-results"].forEach((id) => {
+    document.getElementById(id)?.classList.add("hidden");
+  });
+
   document.getElementById("repo-path").addEventListener("keydown", (e) => {
     if (e.key === "Enter") loadRepo();
   });
