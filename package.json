@@ -6,11 +6,12 @@
     "skill-analyzer": "./src/index.js"
   },
   "scripts": {
-    "start": "node src/index.js",
-    "analyze": "node src/index.js"
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "cli": "node src/index.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0"
-  },
-  "devDependencies": {}
+    "@anthropic-ai/sdk": "^0.39.0",
+    "express": "^5.2.1"
+  }
 }

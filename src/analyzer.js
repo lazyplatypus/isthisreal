@@ -28,9 +28,10 @@ async function analyzeAndUpdateSkills(commits, diffs, existingSkills, options = 
   }
 
   let skillsAnalysis = "";
+  const onBatchComplete = options.onBatchComplete || (() => {});
 
-  for (const batch of batches) {
-    const batchContent = batch.join("\n\n---\n\n");
+  for (let bIdx = 0; bIdx < batches.length; bIdx++) {
+    const batchContent = batches[bIdx].join("\n\n---\n\n");
 
     const response = await client.messages.create({
       model,
@@ -61,6 +62,8 @@ Be specific and cite evidence from the diffs. Output as structured markdown.`,
         .filter((block) => block.type === "text")
         .map((block) => block.text)
         .join("\n") + "\n\n";
+
+    onBatchComplete(bIdx + 1, batches.length);
   }
 
   // Now generate the updated skills.md

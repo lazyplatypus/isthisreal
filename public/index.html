@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skill Analyzer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Skill Analyzer</h1>
+      <p class="subtitle">Analyze git commits to discover developer skills</p>
+    </header>
+
+    <!-- Step 1: Repo Path -->
+    <section class="card" id="step-repo">
+      <div class="step-header">
+        <span class="step-number">1</span>
+        <h2>Repository</h2>
+      </div>
+      <div class="field">
+        <label for="repo-path">Path to git repository</label>
+        <div class="input-row">
+          <input type="text" id="repo-path" placeholder="/path/to/your/repo">
+          <button id="btn-load-repo" onclick="loadRepo()">Load</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 2: Author Selection -->
+    <section class="card hidden" id="step-author">
+      <div class="step-header">
+        <span class="step-number">2</span>
+        <h2>Author</h2>
+      </div>
+      <div class="field">
+        <label>Select commit author</label>
+        <div id="author-list" class="author-list"></div>
+      </div>
+    </section>
+
+    <!-- Step 3: Commits Preview -->
+    <section class="card hidden" id="step-commits">
+      <div class="step-header">
+        <span class="step-number">3</span>
+        <h2>Commits</h2>
+      </div>
+      <div id="commit-info" class="commit-info"></div>
+      <div class="field">
+        <label for="existing-skills">Existing skills.md (optional — paste content to update)</label>
+        <textarea id="existing-skills" rows="6" placeholder="Paste your existing skills.md content here, or leave empty to generate from scratch..."></textarea>
+      </div>
+      <button id="btn-analyze" class="primary" onclick="runAnalysis()">Analyze Commits</button>
+    </section>
+
+    <!-- Step 4: Progress + Results -->
+    <section class="card hidden" id="step-results">
+      <div class="step-header">
+        <span class="step-number">4</span>
+        <h2>Results</h2>
+      </div>
+      <div id="progress-area" class="progress-area">
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <p id="progress-text" class="progress-text">Starting...</p>
+      </div>
+      <div id="result-area" class="hidden">
+        <div class="result-actions">
+          <button onclick="copyResult()">Copy to Clipboard</button>
+          <button onclick="downloadResult()">Download skills.md</button>
+        </div>
+        <div id="skills-output" class="skills-output"></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
