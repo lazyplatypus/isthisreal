@@ -6,9 +6,26 @@ const path = require("path");
  * Returns an array of { hash, date, message }.
  */
 function getCommitsByUser(repoPath, username) {
+  return getCommitsFiltered(repoPath, { author: username });
+}
+
+/**
+ * Get commits with flexible filtering by author and/or branch.
+ * Returns an array of { hash, date, message, author }.
+ */
+function getCommitsFiltered(repoPath, filters = {}) {
   const absolutePath = path.resolve(repoPath);
+  const args = [];
+
+  if (filters.author) {
+    args.push(`--author="${filters.author}"`);
+  }
+  if (filters.branch) {
+    args.push(filters.branch);
+  }
+
   const log = execSync(
-    `git -C "${absolutePath}" log --author="${username}" --pretty=format:"%H||%aI||%s" --no-merges`,
+    `git -C "${absolutePath}" log ${args.join(" ")} --pretty=format:"%H||%aI||%s||%aN" --no-merges`,
     { encoding: "utf-8", maxBuffer: 50 * 1024 * 1024 }
   );
 
@@ -18,8 +35,8 @@ function getCommitsByUser(repoPath, username) {
     .trim()
     .split("\n")
     .map((line) => {
-      const [hash, date, message] = line.split("||");
-      return { hash, date, message };
+      const [hash, date, message, author] = line.split("||");
+      return { hash, date, message, author };
     });
 }
 
@@ -39,7 +56,7 @@ function getDiffForCommit(repoPath, commitHash) {
 }
 
 /**
- * List all authors in a repo (for discovery/validation).
+ * List all authors in a repo.
  */
 function listAuthors(repoPath) {
   const absolutePath = path.resolve(repoPath);
@@ -50,4 +67,16 @@ function listAuthors(repoPath) {
   return output.trim().split("\n").filter(Boolean);
 }
 
-module.exports = { getCommitsByUser, getDiffForCommit, listAuthors };
+/**
+ * List all branches (local + remote tracking) in a repo.
+ */
+function listBranches(repoPath) {
+  const absolutePath = path.resolve(repoPath);
+  const output = execSync(
+    `git -C "${absolutePath}" branch -a --format="%(refname:short)"`,
+    { encoding: "utf-8" }
+  );
+  return output.trim().split("\n").filter(Boolean);
+}
+
+module.exports = { getCommitsByUser, getCommitsFiltered, getDiffForCommit, listAuthors, listBranches };

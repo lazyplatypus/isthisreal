@@ -13,6 +13,38 @@
       <p class="subtitle">Analyze git commits to discover developer skills</p>
     </header>
 
+    <!-- Settings Panel (collapsible) -->
+    <section class="card" id="step-settings">
+      <div class="step-header clickable" onclick="toggleSettings()">
+        <span class="step-icon">&#9881;</span>
+        <h2>Settings</h2>
+        <span class="toggle-arrow" id="settings-arrow">&#9660;</span>
+      </div>
+      <div id="settings-body" class="settings-body">
+        <div class="field-row">
+          <div class="field" style="flex:1">
+            <label for="provider-select">Provider</label>
+            <select id="provider-select" onchange="onProviderChange()">
+              <option value="anthropic">Anthropic</option>
+              <option value="openai">OpenAI</option>
+            </select>
+          </div>
+          <div class="field" style="flex:2">
+            <label for="model-select">Model</label>
+            <select id="model-select"></select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="api-key-input">API Key</label>
+          <div class="input-row">
+            <input type="password" id="api-key-input" placeholder="sk-...">
+            <button onclick="toggleKeyVisibility()" id="btn-toggle-key" class="small-btn">Show</button>
+          </div>
+          <span class="hint">Stored in browser memory only, never sent to our server.</span>
+        </div>
+      </div>
+    </section>
+
     <!-- Step 1: Repo Path -->
     <section class="card" id="step-repo">
       <div class="step-header">
@@ -28,25 +60,35 @@
       </div>
     </section>
 
-    <!-- Step 2: Author Selection -->
-    <section class="card hidden" id="step-author">
+    <!-- Step 2: Filter Commits -->
+    <section class="card hidden" id="step-filter">
       <div class="step-header">
         <span class="step-number">2</span>
-        <h2>Author</h2>
+        <h2>Filter Commits</h2>
       </div>
-      <div class="field">
-        <label>Select commit author</label>
-        <div id="author-list" class="author-list"></div>
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label for="filter-branch">Branch</label>
+          <select id="filter-branch" onchange="applyFilters()">
+            <option value="">All branches</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-author">Author</label>
+          <select id="filter-author" onchange="applyFilters()">
+            <option value="">All authors</option>
+          </select>
+        </div>
       </div>
+      <div id="commit-info" class="commit-info hidden"></div>
     </section>
 
-    <!-- Step 3: Commits Preview -->
-    <section class="card hidden" id="step-commits">
+    <!-- Step 3: Analyze -->
+    <section class="card hidden" id="step-analyze">
       <div class="step-header">
         <span class="step-number">3</span>
-        <h2>Commits</h2>
+        <h2>Analyze</h2>
       </div>
-      <div id="commit-info" class="commit-info"></div>
       <div class="field">
         <label for="existing-skills">Existing skills.md (optional — paste content to update)</label>
         <textarea id="existing-skills" rows="6" placeholder="Paste your existing skills.md content here, or leave empty to generate from scratch..."></textarea>

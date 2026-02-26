@@ -37,6 +37,7 @@ header h1 {
   font-size: 0.95rem;
 }
 
+/* Cards */
 .card {
   background: #1a1a24;
   border: 1px solid #2a2a3a;
@@ -53,6 +54,16 @@ header h1 {
   margin-bottom: 16px;
 }
 
+.step-header.clickable {
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 0;
+}
+
+.step-header.clickable:hover .toggle-arrow {
+  color: #a78bfa;
+}
+
 .step-number {
   width: 28px;
   height: 28px;
@@ -67,11 +78,44 @@ header h1 {
   flex-shrink: 0;
 }
 
+.step-icon {
+  font-size: 1.2rem;
+  color: #888;
+}
+
 .step-header h2 {
   font-size: 1.1rem;
   font-weight: 600;
+  flex: 1;
 }
 
+.toggle-arrow {
+  font-size: 0.75rem;
+  color: #666;
+  transition: transform 0.2s, color 0.2s;
+}
+
+.toggle-arrow.collapsed {
+  transform: rotate(-90deg);
+}
+
+/* Settings */
+.settings-body {
+  margin-top: 16px;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.settings-body.collapsed {
+  display: none;
+}
+
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+
+/* Form fields */
 .field {
   margin-bottom: 16px;
 }
@@ -83,7 +127,17 @@ header h1 {
   margin-bottom: 6px;
 }
 
-input[type="text"], textarea {
+.hint {
+  display: block;
+  font-size: 0.75rem;
+  color: #555;
+  margin-top: 4px;
+}
+
+input[type="text"],
+input[type="password"],
+textarea,
+select {
   width: 100%;
   padding: 10px 14px;
   background: #12121a;
@@ -96,8 +150,20 @@ input[type="text"], textarea {
   transition: border-color 0.2s;
 }
 
-input[type="text"]:focus, textarea:focus {
+input[type="text"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
   border-color: #a78bfa;
+}
+
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23888' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
 }
 
 textarea {
@@ -113,6 +179,7 @@ textarea {
   flex: 1;
 }
 
+/* Buttons */
 button {
   padding: 10px 20px;
   border: none;
@@ -146,6 +213,36 @@ button.primary:hover {
   opacity: 0.9;
 }
 
+button.small-btn {
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+/* Filter bar */
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filter-group {
+  flex: 1;
+}
+
+.filter-group label {
+  display: block;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.filter-group select {
+  font-size: 0.88rem;
+  padding: 8px 12px;
+}
+
+/* Author pills */
 .author-list {
   display: flex;
   flex-wrap: wrap;
@@ -174,11 +271,11 @@ button.primary:hover {
   color: #a78bfa;
 }
 
+/* Commit info */
 .commit-info {
   background: #12121a;
   border-radius: 8px;
   padding: 16px;
-  margin-bottom: 16px;
   font-size: 0.9rem;
   line-height: 1.6;
 }
@@ -188,7 +285,7 @@ button.primary:hover {
 }
 
 .commit-list {
-  max-height: 200px;
+  max-height: 240px;
   overflow-y: auto;
   margin-top: 10px;
   font-size: 0.82rem;
@@ -214,6 +311,12 @@ button.primary:hover {
   font-family: monospace;
 }
 
+.commit-item .author-tag {
+  color: #a78bfa;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+
 .commit-item .msg {
   color: #aaa;
   white-space: nowrap;
@@ -221,6 +324,7 @@ button.primary:hover {
   text-overflow: ellipsis;
 }
 
+/* Progress */
 .progress-area {
   margin-bottom: 16px;
 }
@@ -246,6 +350,7 @@ button.primary:hover {
   color: #999;
 }
 
+/* Results */
 .result-actions {
   display: flex;
   gap: 8px;
@@ -266,6 +371,7 @@ button.primary:hover {
   color: #ccc;
 }
 
+/* Utility */
 .hidden {
   display: none;
 }

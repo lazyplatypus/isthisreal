@@ -2,13 +2,21 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const { getCommitsByUser, getDiffForCommit, listAuthors } = require("./git");
-const { analyzeAndUpdateSkills } = require("./analyzer");
+const { analyzeAndUpdateSkills, ANTHROPIC_MODELS, OPENAI_MODELS } = require("./analyzer");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
+
+// Return available models for each provider
+app.get("/api/models", (req, res) => {
+  res.json({
+    anthropic: ANTHROPIC_MODELS,
+    openai: OPENAI_MODELS,
+  });
+});
 
 // List authors for a given repo path
 app.post("/api/authors", (req, res) => {
@@ -28,16 +36,32 @@ app.post("/api/authors", (req, res) => {
   }
 });
 
-// Get commits for an author (preview step)
+// List branches for a given repo
+app.post("/api/branches", (req, res) => {
+  const { repoPath } = req.body;
+  if (!repoPath) return res.status(400).json({ error: "repoPath is required" });
+
+  const resolved = path.resolve(repoPath);
+  try {
+    const { listBranches } = require("./git");
+    const branches = listBranches(resolved);
+    res.json({ branches });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get commits with flexible filtering
 app.post("/api/commits", (req, res) => {
-  const { repoPath, author } = req.body;
-  if (!repoPath || !author) {
-    return res.status(400).json({ error: "repoPath and author are required" });
+  const { repoPath, author, branch } = req.body;
+  if (!repoPath) {
+    return res.status(400).json({ error: "repoPath is required" });
   }
 
   const resolved = path.resolve(repoPath);
   try {
-    const commits = getCommitsByUser(resolved, author);
+    const { getCommitsFiltered } = require("./git");
+    const commits = getCommitsFiltered(resolved, { author, branch });
     res.json({ commits, total: commits.length });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -46,13 +70,16 @@ app.post("/api/commits", (req, res) => {
 
 // Run the full analysis — uses Server-Sent Events for progress
 app.post("/api/analyze", (req, res) => {
-  const { repoPath, author, existingSkills, model } = req.body;
-  if (!repoPath || !author) {
-    return res.status(400).json({ error: "repoPath and author are required" });
+  const { repoPath, author, branch, existingSkills, provider, apiKey, model } = req.body;
+  if (!repoPath) {
+    return res.status(400).json({ error: "repoPath is required" });
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return res.status(500).json({ error: "ANTHROPIC_API_KEY is not set on the server" });
+  const resolvedProvider = provider || "anthropic";
+  const resolvedKey = apiKey || process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY;
+
+  if (!resolvedKey) {
+    return res.status(400).json({ error: "No API key provided. Enter one in the settings panel." });
   }
 
   // Set up SSE
@@ -71,10 +98,12 @@ app.post("/api/analyze", (req, res) => {
   (async () => {
     try {
       send("status", { message: "Fetching commits..." });
-      const commits = getCommitsByUser(resolved, author);
+      const { getCommitsFiltered } = require("./git");
+      const commits = getCommitsFiltered(resolved, { author, branch });
 
       if (commits.length === 0) {
-        send("error", { message: `No commits found for "${author}"` });
+        const filters = [author && `author "${author}"`, branch && `branch "${branch}"`].filter(Boolean).join(", ");
+        send("error", { message: `No commits found for ${filters || "the given filters"}` });
         res.end();
         return;
       }
@@ -93,15 +122,19 @@ app.post("/api/analyze", (req, res) => {
         }
       }
 
-      send("status", { message: "Sending diffs to LLM for analysis..." });
+      send("status", { message: `Sending diffs to ${resolvedProvider === "anthropic" ? "Claude" : "OpenAI"} for analysis...` });
 
       const updatedSkills = await analyzeAndUpdateSkills(
         commits,
         diffs,
         existingSkills || "",
-        { model, onBatchComplete: (batchNum, totalBatches) => {
+        {
+          provider: resolvedProvider,
+          apiKey: resolvedKey,
+          model,
+          onBatchComplete: (batchNum, totalBatches) => {
             send("progress", { step: "llm", current: batchNum, total: totalBatches });
-          }
+          },
         }
       );
 
