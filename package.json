@@ -1,11 +1,16 @@
 {
-  "name": "intro-to-serverless",
+  "name": "skill-analyzer",
   "version": "1.0.0",
-  "description": "",
-  "scripts": {
-    "start": "func start",
-    "test": "echo \"No tests yet...\""
+  "description": "Analyze git commits to update a skills.md file using an LLM",
+  "bin": {
+    "skill-analyzer": "./src/index.js"
   },
-  "dependencies": {},
+  "scripts": {
+    "start": "node src/index.js",
+    "analyze": "node src/index.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0"
+  },
   "devDependencies": {}
 }
