@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saju Reading | 사주 리딩</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-symbol">四柱八字</div>
+      <h1>Saju Reading</h1>
+      <p class="subtitle">사주팔자 — Four Pillars of Destiny</p>
+    </header>
+
+    <!-- Input Form -->
+    <section id="input-section" class="card">
+      <h2>Enter Your Birth Information</h2>
+      <form id="birth-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Name (optional)</label>
+            <input type="text" id="name" placeholder="Your name">
+          </div>
+          <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender" required>
+              <option value="male">Male (남성)</option>
+              <option value="female">Female (여성)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="year">Year</label>
+            <input type="number" id="year" min="1900" max="2100" placeholder="1990" required>
+          </div>
+          <div class="form-group">
+            <label for="month">Month</label>
+            <select id="month" required>
+              <option value="1">January (1월)</option>
+              <option value="2">February (2월)</option>
+              <option value="3">March (3월)</option>
+              <option value="4">April (4월)</option>
+              <option value="5">May (5월)</option>
+              <option value="6">June (6월)</option>
+              <option value="7">July (7월)</option>
+              <option value="8">August (8월)</option>
+              <option value="9">September (9월)</option>
+              <option value="10">October (10월)</option>
+              <option value="11">November (11월)</option>
+              <option value="12">December (12월)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="day">Day</label>
+            <input type="number" id="day" min="1" max="31" placeholder="15" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="hour">Hour</label>
+            <select id="hour" required>
+              <option value="0">12 AM (자시 子)</option>
+              <option value="1">1 AM (축시 丑)</option>
+              <option value="2">2 AM</option>
+              <option value="3">3 AM (인시 寅)</option>
+              <option value="4">4 AM</option>
+              <option value="5">5 AM (묘시 卯)</option>
+              <option value="6">6 AM</option>
+              <option value="7">7 AM (진시 辰)</option>
+              <option value="8">8 AM</option>
+              <option value="9">9 AM (사시 巳)</option>
+              <option value="10">10 AM</option>
+              <option value="11">11 AM (오시 午)</option>
+              <option value="12">12 PM</option>
+              <option value="13">1 PM (미시 未)</option>
+              <option value="14">2 PM</option>
+              <option value="15">3 PM (신시 申)</option>
+              <option value="16">4 PM</option>
+              <option value="17">5 PM (유시 酉)</option>
+              <option value="18">6 PM</option>
+              <option value="19">7 PM (술시 戌)</option>
+              <option value="20">8 PM</option>
+              <option value="21">9 PM (해시 亥)</option>
+              <option value="22">10 PM</option>
+              <option value="23">11 PM (자시 子)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="minute">Minute</label>
+            <input type="number" id="minute" min="0" max="59" value="0" placeholder="0">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reading-type">Reading Type</label>
+            <select id="reading-type">
+              <option value="full">Full Reading (종합운)</option>
+              <option value="personality">Personality (성격)</option>
+              <option value="career">Career & Wealth (재물운)</option>
+              <option value="love">Love & Relationships (연애운)</option>
+              <option value="yearly">Yearly Fortune (올해운세)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="language">Language</label>
+            <select id="language">
+              <option value="en">English</option>
+              <option value="ko">한국어</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button type="button" id="btn-chart" class="btn btn-secondary">View Chart Only</button>
+          <button type="submit" id="btn-reading" class="btn btn-primary">Get Full Reading</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Loading -->
+    <section id="loading-section" class="card hidden">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p id="loading-text">Calculating your Four Pillars...</p>
+      </div>
+    </section>
+
+    <!-- Chart Display -->
+    <section id="chart-section" class="hidden">
+      <div class="card">
+        <h2>Your Four Pillars <span class="kr-label">사주팔자</span></h2>
+        <div class="chart-info" id="chart-info"></div>
+        <div class="pillars-grid" id="pillars-grid"></div>
+      </div>
+
+      <!-- Day Master -->
+      <div class="card" id="day-master-card"></div>
+
+      <!-- Element Balance -->
+      <div class="card">
+        <h2>Five Elements Balance <span class="kr-label">오행 균형</span></h2>
+        <div class="element-bars" id="element-bars"></div>
+      </div>
+
+      <!-- Symbolic Stars -->
+      <div class="card" id="stars-card" style="display:none">
+        <h2>Symbolic Stars <span class="kr-label">신살</span></h2>
+        <div id="stars-list"></div>
+      </div>
+
+      <!-- Luck Cycles -->
+      <div class="card">
+        <h2>Luck Cycles <span class="kr-label">대운</span></h2>
+        <div class="luck-cycles" id="luck-cycles"></div>
+      </div>
+    </section>
+
+    <!-- Reading Display -->
+    <section id="reading-section" class="card hidden">
+      <h2>Your Reading <span class="kr-label" id="reading-type-label"></span></h2>
+      <div id="reading-content" class="reading-content"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Chart calculations are deterministic (sxtwl + KARI lunar calendar).</p>
+      <p>Interpretations powered by Claude AI.</p>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

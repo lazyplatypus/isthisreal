@@ -1,0 +1,558 @@
+/* ─── Base ────────────────────────────────────────────────────────────────── */
+
+:root {
+  --bg: #0f0f14;
+  --surface: #1a1a24;
+  --surface-hover: #22222e;
+  --border: #2a2a3a;
+  --text: #e8e6e3;
+  --text-muted: #8a8a9a;
+  --accent: #c9a96e;
+  --accent-glow: #c9a96e33;
+  --wood: #4a9e5c;
+  --fire: #d4513a;
+  --earth: #c49a3c;
+  --metal: #b0b8c8;
+  --water: #3a7bc8;
+  --yang: #f0c050;
+  --yin: #7090c0;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+/* ─── Header ──────────────────────────────────────────────────────────────── */
+
+.header {
+  text-align: center;
+  padding: 48px 0 32px;
+}
+
+.header-symbol {
+  font-size: 2rem;
+  color: var(--accent);
+  letter-spacing: 0.5em;
+  margin-bottom: 8px;
+  font-weight: 300;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+/* ─── Cards ───────────────────────────────────────────────────────────────── */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  margin-bottom: 24px;
+}
+
+.card h2 {
+  font-size: 1.3rem;
+  font-weight: 400;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.kr-label {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-left: 8px;
+}
+
+/* ─── Form ────────────────────────────────────────────────────────────────── */
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-group input,
+.form-group select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.form-group select option {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn {
+  flex: 1;
+  padding: 14px 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+}
+
+.btn-primary:hover {
+  background: #d4b478;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.btn-secondary:hover {
+  background: var(--accent-glow);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── Loading ─────────────────────────────────────────────────────────────── */
+
+.loading {
+  text-align: center;
+  padding: 48px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ─── Pillars Grid ────────────────────────────────────────────────────────── */
+
+.chart-info {
+  text-align: center;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+  font-size: 0.9rem;
+}
+
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.pillar {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 20px 12px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.pillar:hover {
+  border-color: var(--accent);
+}
+
+.pillar-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.pillar-stem {
+  font-size: 2.2rem;
+  font-weight: 300;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.pillar-branch {
+  font-size: 2.2rem;
+  font-weight: 300;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.pillar-info {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.pillar-ten-god {
+  display: inline-block;
+  background: var(--accent-glow);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  margin-top: 8px;
+}
+
+.pillar-animal {
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.pillar-hidden {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+/* Element colors on stems/branches */
+.el-wood { color: var(--wood); }
+.el-fire { color: var(--fire); }
+.el-earth { color: var(--earth); }
+.el-metal { color: var(--metal); }
+.el-water { color: var(--water); }
+
+/* ─── Day Master ──────────────────────────────────────────────────────────── */
+
+#day-master-card {
+  text-align: center;
+}
+
+.day-master-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 16px;
+}
+
+.day-master-char {
+  font-size: 4rem;
+  font-weight: 200;
+}
+
+.day-master-info {
+  text-align: left;
+}
+
+.day-master-info .label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.day-master-info .value {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+/* ─── Element Balance ─────────────────────────────────────────────────────── */
+
+.element-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.element-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.element-label {
+  width: 80px;
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+.element-bar-track {
+  flex: 1;
+  height: 28px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.element-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #000;
+  min-width: 30px;
+}
+
+.element-bar-fill.wood { background: var(--wood); }
+.element-bar-fill.fire { background: var(--fire); }
+.element-bar-fill.earth { background: var(--earth); }
+.element-bar-fill.metal { background: var(--metal); }
+.element-bar-fill.water { background: var(--water); }
+
+/* ─── Symbolic Stars ──────────────────────────────────────────────────────── */
+
+.star-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+
+.star-name {
+  font-weight: 500;
+  color: var(--accent);
+  min-width: 120px;
+}
+
+.star-name .cn {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+
+.star-pillar {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: var(--surface);
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.star-desc {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+/* ─── Luck Cycles ─────────────────────────────────────────────────────────── */
+
+.luck-cycles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.luck-cycle {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 10px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.luck-cycle:hover {
+  border-color: var(--accent);
+}
+
+.luck-age {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.luck-chars {
+  font-size: 1.4rem;
+  font-weight: 300;
+  margin-bottom: 4px;
+}
+
+.luck-element {
+  font-size: 0.8rem;
+}
+
+.luck-animal {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ─── Reading ─────────────────────────────────────────────────────────────── */
+
+.reading-content {
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.reading-content h1,
+.reading-content h2,
+.reading-content h3 {
+  color: var(--accent);
+  margin-top: 24px;
+  margin-bottom: 12px;
+  font-weight: 400;
+}
+
+.reading-content h1 { font-size: 1.5rem; }
+.reading-content h2 { font-size: 1.25rem; border-bottom: none; padding-bottom: 0; }
+.reading-content h3 { font-size: 1.1rem; }
+
+.reading-content p {
+  margin-bottom: 12px;
+}
+
+.reading-content ul, .reading-content ol {
+  margin-left: 20px;
+  margin-bottom: 12px;
+}
+
+.reading-content li {
+  margin-bottom: 4px;
+}
+
+.reading-content strong {
+  color: var(--accent);
+}
+
+.reading-content em {
+  color: var(--text-muted);
+}
+
+/* ─── Footer ──────────────────────────────────────────────────────────────── */
+
+.footer {
+  text-align: center;
+  padding: 32px 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--border);
+  margin-top: 32px;
+}
+
+.footer p {
+  margin-bottom: 4px;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pillars-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .luck-cycles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .header h1 {
+    font-size: 1.8rem;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .day-master-display {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .day-master-info {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .pillars-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pillar-stem, .pillar-branch {
+    font-size: 1.6rem;
+  }
+
+  .luck-cycles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
