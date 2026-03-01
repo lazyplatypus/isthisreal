@@ -53,12 +53,28 @@ This is the consensus from developers who have built saju/bazi AI apps. The arti
 
 ### Option 1: Open-Source Calculation Libraries
 
-#### JavaScript / TypeScript
+#### Korean-Specific Libraries (Manseryeok / 만세력)
+
+These are **Korean saju-specific** — not just generic BaZi. They use KARI/KASI data and handle Korean lunar calendar nuances:
+
+| Library | Language | Description | Install |
+|---------|----------|-------------|---------|
+| [manseryeok-js](https://github.com/urstory/manseryeok-js) | TypeScript/JS | KASI data, 절기 (solar terms), four pillars, true solar time correction by longitude (Seoul: -32min, Busan: -24min), 1900–2050 | GitHub |
+| [manseryeok](https://github.com/yhj1024/manseryeok) | TypeScript | Full 사주팔자 calculation (년주/월주/일주/시주), solar-lunar conversion, minute-level precision | GitHub |
+| [korean-lunar-calendar (JS)](https://github.com/usingsky/korean_lunar_calendar_js) | JavaScript | KARI-sourced Korean solar-lunar conversion, 1000–2050 | GitHub |
+| [korean-lunar-calendar (Python)](https://github.com/usingsky/korean_lunar_calendar_py) | Python | KARI-sourced Korean solar-lunar conversion, 1000–2050 | `pip install korean-lunar-calendar` |
+| [KoreanLunarCalendar](https://github.com/usingsky/KoreanLunarCalendar) | Java | Same KARI data, Java version | GitHub |
+| [go-klc](https://github.com/chunghha/go-klc) | Go | KARI-based Korean lunar calendar, 1391–2050 | GitHub |
+| [klc](https://pub.dev/documentation/klc/latest/) | Dart | KARI-based, for Flutter apps | pub.dev |
+
+> **Important**: Korean and Chinese lunar dates can diverge. Always use KARI-sourced libraries for Korean saju.
+
+#### JavaScript / TypeScript (BaZi/General)
 
 | Library | Description | Install |
 |---------|-------------|---------|
 | [bazi-calculator-by-alvamind](https://github.com/alvamind/bazi-calculator-by-alvamind) | Comprehensive BaZi calculator with Five Elements, Ten Gods, Nobility stars, Peach Blossom | `npm install bazi-calculator-by-alvamind` |
-| [@aharris02/bazi-calculator](https://www.npmjs.com/package/@aharris02/bazi-calculator-by-alvamind) | Enhanced fork with timezone-aware processing, Luck Pillars, stem/branch interactions | `npm install @aharris02/bazi-calculator-by-alvamind` |
+| [@aharris02/bazi-calculator](https://www.npmjs.com/package/@aharris02/bazi-calculator-by-alvamind) | Enhanced fork with timezone-aware processing, Luck Pillars, stem/branch interactions, clashes, harms, punishments | `npm install @aharris02/bazi-calculator-by-alvamind` |
 | [Gmuli-Bazi-Calc](https://github.com/Gmuli/Gmuli-Bazi-Calc) | Web-based, handles Heavenly Stems, Earthly Branches, 60 Jiazi cycle | Browser-based |
 | [@kurone-kito/dantalion](https://www.npmjs.com/package/@kurone-kito/dantalion-cli) | Four Pillars personality assessment (1873–2050) | `npm install @kurone-kito/dantalion` |
 
@@ -66,6 +82,9 @@ This is the consensus from developers who have built saju/bazi AI apps. The arti
 
 | Library | Description | Install |
 |---------|-------------|---------|
+| [lunar_python](https://pypi.org/project/lunar_python/) | **Most comprehensive.** Full EightChar/BaZi with Four Pillars, Ten Gods (十神), Five Elements, Hidden Stems, Fortune Cycles (大运/流年/小运), Na Yin, reverse BaZi lookup, 24 solar terms. By [6tail](https://github.com/6tail/lunar-python) | `pip install lunar_python` |
+| [sxtwl](https://pypi.org/project/sxtwl/) | C++-backed, fast. Gan-Zhi for year/month/day/hour, four-pillar reverse lookup, solar terms. Dates from 722 BC. Python 2.7–3.13 | `pip install sxtwl` |
+| [eacal](https://pypi.org/project/eacal/) | Sexagenary cycle IDs (0–59), solar terms via PyEphem. Supports Korean, Chinese, Japanese, Vietnamese, English | `pip install eacal` |
 | [purejoy/baziapp](https://github.com/purejoy/baziapp) | Python BaZi chart generator from birth time | Clone from GitHub |
 | [lunar-mcp-server](https://github.com/AngusHsu/lunar-mcp-server) | MCP server with BaZi, lunar calendar, Five Elements, compatibility | `pip install lunar-mcp-server` |
 | [bach-lunar-mcp](https://github.com/BACH-AI-Tools/lunar_mcp_server) | MCP server with BaZi, Wu Xing analysis, solar terms | `pip install bach-lunar-mcp` |
@@ -158,8 +177,9 @@ Cantian AI's approach of digitizing classical texts is a strong RAG strategy:
 **Layer 1 — Deterministic Calculation Engine** (no LLM)
 - Convert solar date → lunar date → Four Pillars
 - Compute Ten Gods, element balance, symbolic stars
-- Handle edge cases (solar term transitions, Zi hour, DST)
-- Use: `bazi-calculator-by-alvamind` (JS) or `lunar-mcp-server` (Python)
+- Handle edge cases (solar term transitions, Zi hour, DST, true solar time by longitude)
+- Korean-specific: `manseryeok-js` (TS, KASI data) + `korean-lunar-calendar` (KARI data)
+- General BaZi: `bazi-calculator-by-alvamind` (JS) or `lunar_python` (Python, most comprehensive)
 
 **Layer 2 — Claude API for Interpretation**
 - Receives the computed chart as structured JSON
@@ -185,13 +205,75 @@ Based on developer experience building Korean saju apps:
 
 ---
 
+### Claude API Integration Options
+
+**Option A: Tool Use / Function Calling**
+```
+Claude API Call
+  → Tool: calculate_saju(birth_date, birth_time, gender, timezone)
+  → Returns: Structured JSON with all pillar data
+  → Claude interprets the returned data and generates reading
+```
+
+**Option B: MCP Server (Best for prototyping)**
+```json
+{
+  "mcpServers": {
+    "Bazi": { "command": "npx", "args": ["bazi-mcp"] }
+  }
+}
+```
+Claude Desktop calls the BaZi MCP tool directly, receives structured JSON, and interprets it in one conversation flow.
+
+**Option C: RAG + Claude (Best for deep readings)**
+- Index classical texts (자평진전, 삼명통회, 적천수) in a vector DB (Pinecone, Weaviate, pgvector)
+- Given a computed chart, retrieve relevant interpretation chunks
+- Feed chart JSON + retrieved context to Claude for grounded readings
+
+---
+
+## Critical Edge Cases to Handle
+
+1. **Solar term transition times** — Must be precise to the minute per year. Use astronomical calculations or pre-computed tables.
+2. **Zi hour (자시) handling** — Decide which school: early Zi (23:00–23:59) = current day vs. next day.
+3. **Korean vs. Chinese lunar dates** — Always use KARI-sourced data for Korean users. They diverge on some dates.
+4. **True solar time correction** — Adjust for longitude within Korea (Seoul vs. Busan = ~8 minute difference). `manseryeok-js` handles this.
+5. **Leap months (윤달)** — Korean lunar calendar intercalary months must be handled correctly.
+6. **Historical date accuracy** — Solar term calculations before 1900 may require different astronomical models.
+
+---
+
 ## Quick-Start Recommendation
 
 For the fastest path to a working saju app:
 
-1. **Use `@aharris02/bazi-calculator-by-alvamind`** for pillar calculations (JS/TS, timezone-aware, most complete)
-2. **Use Claude API (Sonnet)** with a well-crafted system prompt containing saju interpretation rules
-3. **Feed the computed chart JSON** into Claude for natural-language reading
-4. **Optionally add the BaZi MCP server** if using Claude Desktop for development
+1. **Use `manseryeok-js`** for Korean-specific pillar calculations (KASI data, solar time correction, 절기 precision)
+2. **Use `korean-lunar-calendar`** for accurate Korean solar-lunar conversion (KARI data)
+3. **Use Claude API (Sonnet)** with a well-crafted system prompt containing saju interpretation rules
+4. **Feed the computed chart JSON** into Claude for natural-language reading
+5. **Optionally add the BaZi MCP server** for rapid prototyping in Claude Desktop
+
+For a **Python backend**: use `lunar_python` (most comprehensive BaZi engine) + `korean-lunar-calendar` (Korean-specific dates).
 
 This gives you accurate calculations + eloquent, culturally-aware interpretations without needing to build a knowledge base from scratch.
+
+---
+
+## Sources
+
+- [DEV Community - Why You Shouldn't Let AI Do Your Fortune Telling](https://dev.to/ji_ai/why-you-shouldnt-let-ai-do-your-fortune-telling-and-how-to-do-it-right-1ec2)
+- [DEV Community - Claude vs GPT vs Gemini for Saju](https://dev.to/ji_ai/claude-vs-gpt-vs-gemini-how-to-cocktail-them-like-a-pro-66k)
+- [Skywork AI - BaZi MCP Server Deep Dive](https://skywork.ai/skypage/en/bazi-ai-engineer-code/1981206600771096576)
+- [Cantian AI](https://www.cantian.ai/en)
+- [Saju.com - Korean Fortune Reading](https://saju.com/en)
+- [Creatrip - Guide to Korean Fortune-Telling](https://creatrip.com/en/blog/14459)
+- [KCulture - Decoding Saju](https://kculture.com/decoding-saju-a-beginners-guide-to-korean-fortune-telling/)
+- [Qiora - From BaZi to K-Saju](https://qiora.app/blog/k-saju-what-korea-did-with-chinas-four-pillars)
+- [GitHub - bazi-mcp](https://github.com/cantian-ai/bazi-mcp)
+- [GitHub - manseryeok-js](https://github.com/urstory/manseryeok-js)
+- [GitHub - korean_lunar_calendar_py](https://github.com/usingsky/korean_lunar_calendar_py)
+- [GitHub - bazi-calculator-by-alvamind](https://github.com/alvamind/bazi-calculator-by-alvamind)
+- [PyPI - lunar_python](https://pypi.org/project/lunar_python/)
+- [PyPI - sxtwl](https://pypi.org/project/sxtwl/)
+- [npm - bazi keyword search](https://www.npmjs.com/search?q=keywords:bazi)
+- [GitHub - bazi topic](https://github.com/topics/bazi)
